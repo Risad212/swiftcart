@@ -47,7 +47,7 @@ class Routes
     {
         $method = $_SERVER['REQUEST_METHOD'];
         $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-        $subfolder = '/projects/php-project';
+        $subfolder = '/projects/swiftcart';
 
         // 1. Remove subfolder if it exists in the URI
         if (strpos($uri, $subfolder) === 0) {
