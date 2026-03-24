@@ -46,29 +46,27 @@ class Routes
     public function dispatch()
     {
         $method = $_SERVER['REQUEST_METHOD'];
-        $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-        $subfolder = '/projects/php-framework';
-        if (strpos($path, $subfolder) === 0) {
-            $path = substr($path, strlen($subfolder));
+        $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+        $subfolder = '/projects/php-project';
+
+        // 1. Remove subfolder if it exists in the URI
+        if (strpos($uri, $subfolder) === 0) {
+            $uri = substr($uri, strlen($subfolder));
         }
 
-        $path = $path ?: '/';
+        $path = '/' . trim($uri, '/');
 
         $request = $this->getRequest();
 
+        // 3. Match against the cleaned path
         if (isset(self::$routes[$method][$path])) {
             $callback = self::$routes[$method][$path];
-
-            if (!($callback instanceof Closure)) {
-                throw new Exception(sprintf('The second parameter must be a Closure.'));
-            }
-
             echo $callback($request);
             exit;
         }
 
         http_response_code(404);
-        echo '404 Not Found';
+        echo "404 - Router could not find:";
         exit;
     }
 }

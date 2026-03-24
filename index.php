@@ -14,7 +14,7 @@ define('BASE_URL', baseUrl());
 
 
 Routes::get('/', function () {
-    return view('app', ['name' => 'Risad']);
+    return view('app', []);
 });
 
 Routes::get('/checkout', function () {
