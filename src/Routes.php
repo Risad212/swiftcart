@@ -3,11 +3,9 @@
 namespace App;
 
 use Closure;
-use Exception;
 
 class Routes
 {
-
     private static $routes = [];
     private static $instance = null;
 
@@ -18,19 +16,6 @@ class Routes
         }
 
         return self::$instance;
-    }
-
-    private function getRequest()
-    {
-
-        $method = strtoupper($_SERVER['REQUEST_METHOD']);
-
-        switch ($method) {
-            case 'POST':
-                return $_POST;
-            case 'GET':
-                return $_GET;
-        }
     }
 
     public static function get(string $path, Closure $callback)
@@ -46,27 +31,46 @@ class Routes
     public function dispatch()
     {
         $method = $_SERVER['REQUEST_METHOD'];
-        $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-        $subfolder = '/projects/swiftcart';
 
-        // 1. Remove subfolder if it exists in the URI
-        if (strpos($uri, $subfolder) === 0) {
-            $uri = substr($uri, strlen($subfolder));
+        $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+
+        // 🔥 FIX: remove project folder dynamically (no hardcode issue later)
+        $basePath = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME']));
+        $basePath = rtrim($basePath, '/');
+
+        if ($basePath !== '' && strpos($uri, $basePath) === 0) {
+            $uri = substr($uri, strlen($basePath));
         }
 
         $path = '/' . trim($uri, '/');
 
         $request = $this->getRequest();
 
-        // 3. Match against the cleaned path
         if (isset(self::$routes[$method][$path])) {
             $callback = self::$routes[$method][$path];
-            echo $callback($request);
+
+            $callback($request);
             exit;
         }
 
         http_response_code(404);
-        echo "404 - Router could not find:";
+
+        header('Content-Type: application/json');
+        echo json_encode([
+            "error" => "Route not found",
+            "path" => $path
+        ]);
         exit;
+    }
+
+    private function getRequest()
+    {
+        $method = $_SERVER['REQUEST_METHOD'];
+
+        return match ($method) {
+            'POST' => $_POST,
+            'GET' => $_GET,
+            default => []
+        };
     }
 }

@@ -6,24 +6,17 @@ error_reporting(E_ALL);
 require_once __DIR__ . '/vendor/autoload.php';
 
 use App\Routes;
-use App\controller\inputController;
+use App\Controller\PaymentController;
 
 require_once 'helper.php';
-
-define('BASE_URL', baseUrl());
-
+require_once 'config.php';
 
 Routes::get('/', function () {
     return view('app', []);
 });
 
-Routes::get('/checkout', function () {
-    return view('/checkout', ['name' => 'risad', 'email' => 'risad@gmail.com']);
-});
-
-Routes::post('/checkout', function ($request) {
-    $inputController = new inputController();
-    $inputHandle     = $inputController->inputHandle($request);
+Routes::post('/create-session', function () {
+    PaymentController::createSession();
 });
 
 $routes = Routes::getInstance();
